@@ -89,4 +89,7 @@ Michael Browne
 
 [@brownemint](http://www.twitter.com/brownemint)
 
+## Notes
 
++ Currently the image quality is set to its lowest value. An update to dynamically change this is imminent.
++ Don't forget to check out Jonathon Carter's [CameraView](https://github.com/jonathanrcarter/CameraView) for something similar for iOS

@@ -1,34 +1,37 @@
-// This is a test harness for your module
-// You should do something interesting in this harness 
-// to test out the module and to provide instructions 
-// to users on how to use it by example.
-
-
-// open a single window
 var win = Ti.UI.createWindow({
-	backgroundColor:'white',
-	navBarHidden: false
+	navBarHidden: true,
+	fullscreen: true,
+	backgroundColor:'white'
 });
-var label = Ti.UI.createLabel();
-win.add(label);
+win.orientationModes = [Ti.UI.PORTRAIT];
 win.open();
 
-// TODO: write your module tests here
-var customandroidcamera = require('pw.custom.androidcamera');
-Ti.API.info("module is => " + customandroidcamera);
+if( Ti.Media.isCameraSupported ) {
+	var androidcamera = require("pw.custom.androidcamera");
+	var camera = androidcamera.createCameraView({save_location: "pharmacy"});
+	
+	var btSnap = Ti.UI.createButton({
+		title: "Capture",
+		bottom: "10dp",
+		height: "80dp",
+		width: "80dp",
+		zIndex: 2
+	});
 
-label.text = customandroidcamera.example();
+	btSnap.addEventListener("click", function(){
+		camera.snapPicture();
+	});
 
-Ti.API.info("module exampleProp is => " + customandroidcamera.exampleProp);
-customandroidcamera.exampleProp = "This is a test value";
+	camera.addEventListener("picture_taken", function(evt){
+		alert("Image saved to "+evt.path);
+	});
 
-label.addEventListener("click", function(){
-	if (Ti.Platform.name == "android") {
-		var proxy = customandroidcamera.createCameraView({height: 200, width: 200});
+	win.addEventListener("close", function(){
+		camera = null;
+	});
 
-		proxy.printMessage("Hello world!");
-		proxy.message = "Hi world!.  It's me again.";
-		proxy.printMessage("Hello world!");
-		win.add(proxy);
-	}
-});
+	win.add(camera);
+	win.add(btSnap);
+} else {
+	alert("No camera found!");
+}
