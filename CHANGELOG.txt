@@ -1,1 +1,6 @@
-Place your change log text here.  This file will be incorporated with your app at package time.
+Version: 0.5
+Author: Michael Browne
+Date: Monday, August 18th 2014
+
+Moved getCameraInstance to sufaceCreated function to avoid crash from resume (thanks to Erez Pilosof)
+Added a property (useFrontCamera) to specify using the front facing camera on a device (where available)

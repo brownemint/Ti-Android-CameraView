@@ -22,7 +22,8 @@ Create a new instance of the camera view. The method takes a dictionary of the f
 
 **arguments** 
  
-+ save_location - DIrectory to save the image to
++ save_location (String) - Directory to save the image in. DEFAULT = "camera". CREATION ONLY.
++ useFrontCamera (Boolean) - Use the front camera or not. DEFAULT = false. CREATION ONLY.
 
 ### takePicture _(method)_
 
@@ -55,7 +56,10 @@ Then, to use the module in app, do something like the following:
 	
 	if( Ti.Media.isCameraSupported ) {
 		var androidcamera = require("pw.custom.androidcamera");
-		var camera = androidcamera.createCameraView({save_location: "pharmacy"});
+		var camera = androidcamera.createCameraView({
+			save_location: "pharmacy",
+			useFrontCamera: true
+		});
 		
 		var btSnap = Ti.UI.createButton({
 			title: "Capture",
@@ -83,6 +87,12 @@ Then, to use the module in app, do something like the following:
 		alert("No camera found!");
 	}
 
+##Changelog
+
+Version 0.5:
+Removed potential crash when the app is resumed while the camera view is open.
+Added ability to pick camera when creating view (useFrontCamera).
+
 ## Author
 
 Michael Browne
@@ -91,5 +101,6 @@ Michael Browne
 
 ## Notes
 
++ To switch between cameras, remove the current camera from the window, null it and recreate the camera view with the opposite useFrontCamera boolean and add it back to the window.
 + Currently the image quality is set to its lowest value. An update to dynamically change this is imminent.
 + Don't forget to check out Jonathon Carter's [CameraView](https://github.com/jonathanrcarter/CameraView) for something similar for iOS

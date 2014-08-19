@@ -18,32 +18,26 @@ import java.util.Date;
 import java.util.List;
 
 import org.appcelerator.kroll.KrollDict;
-import org.appcelerator.kroll.KrollProxy;
 import org.appcelerator.kroll.annotations.Kroll;
-import org.appcelerator.titanium.TiC;
-import org.appcelerator.titanium.util.Log;
-import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.proxy.TiViewProxy;
-import org.appcelerator.titanium.view.TiCompositeLayout;
-import org.appcelerator.titanium.view.TiCompositeLayout.LayoutArrangement;
+import org.appcelerator.titanium.util.Log;
 import org.appcelerator.titanium.view.TiUIView;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
-import android.view.SurfaceView;
 import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.widget.FrameLayout;
 
 
@@ -60,6 +54,7 @@ public class CameraViewProxy extends TiViewProxy
 	// Standard Debugging variables
 	private static final String TAG = "CameraViewProxy";
 	private static String SAVE = "camera";
+	private static Boolean FRONT_CAMERA = false;
 	
 	private class CameraView extends TiUIView implements SurfaceHolder.Callback
 	{
@@ -68,7 +63,6 @@ public class CameraViewProxy extends TiViewProxy
 		public CameraView(TiViewProxy proxy) {
 			super(proxy);
 			
-			this.camera = getCameraInstance();
 			SurfaceView preview = new SurfaceView(proxy.getActivity());
 			SurfaceHolder previewHolder = preview.getHolder();
 			previewHolder.addCallback(this);
@@ -94,6 +88,11 @@ public class CameraViewProxy extends TiViewProxy
 			if(d.containsKey("save_location")){
 				SAVE = d.getString("save_location");
 			}
+			
+			if( d.containsKey("useFrontCamera") ){
+				Log.i(TAG, "Front Camera Property exists!");
+				FRONT_CAMERA = d.getBoolean("useFrontCamera");
+			}
 		}
 
 		@Override
@@ -110,6 +109,8 @@ public class CameraViewProxy extends TiViewProxy
 			Log.i(TAG, "Opening Camera");
 			try
 			{
+				this.camera = getCameraInstance();
+				
 				Log.i(TAG, "Setting Preview Display");
 				camera.setPreviewDisplay(previewHolder);
 				camera.setDisplayOrientation(90);
@@ -142,7 +143,10 @@ public class CameraViewProxy extends TiViewProxy
 			Camera c = null;
 			try
 			{
-				c = Camera.open();
+				if( FRONT_CAMERA && hasFrontCamera() )
+					c = Camera.open( Camera.CameraInfo.CAMERA_FACING_FRONT );
+				else
+					c = Camera.open();
 			}
 			catch( Exception e )
 			{
@@ -176,26 +180,6 @@ public class CameraViewProxy extends TiViewProxy
 			SAVE = options.getString("save_location");
 		}
 	}
-	
-	/*// Methods
-	@Kroll.method
-	public void printMessage(String message)
-	{
-		Log.d(TAG, "printing message: " + message);
-	}
-
-
-	@Kroll.getProperty @Kroll.method
-	public String getMessage()
-	{
-        return "Hello World from my module";
-	}
-
-	@Kroll.setProperty @Kroll.method
-	public void setMessage(String message)
-	{
-	    Log.d(TAG, "Tried setting module message to: " + message);
-	}*/
 	
 	// Added by michael browne
 	@Kroll.method
@@ -241,7 +225,7 @@ public class CameraViewProxy extends TiViewProxy
 			Log.i(TAG, "Picture Orientation is "+picture_orientation);
 			Log.i(TAG, "Device Orientation is "+device_orientation);
 			
-			doRotation(path, 90); // Just rotate 90 degrees.... may cause problems on some devices
+			doRotation(path, FRONT_CAMERA ? 270 : 90); // Just rotate 90 degrees.... may cause problems on some devices
 			
 			// Do the rotation depending on the orientation
 			/*switch(picture_orientation){
@@ -394,5 +378,22 @@ public class CameraViewProxy extends TiViewProxy
 	    }
 
 	    return false;
+	}
+	
+	/**
+	 * Function to determine if a front camera exists
+	 * @return Boolean Front Camera Exists
+	 */
+	
+	private boolean hasFrontCamera(){
+		int numCameras= Camera.getNumberOfCameras();
+		for(int i=0;i<numCameras;i++){
+		    Camera.CameraInfo info = new CameraInfo();
+		    Camera.getCameraInfo(i, info);
+		    if(Camera.CameraInfo.CAMERA_FACING_FRONT == info.facing){
+		        return true;
+		    }
+		}
+		return false;
 	}
 }
