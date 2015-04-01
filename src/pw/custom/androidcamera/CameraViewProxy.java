@@ -117,7 +117,7 @@ public class CameraViewProxy extends TiViewProxy
 			
 				Parameters cameraParams = camera.getParameters();
 				// cameraParams.setPreviewSize(layoutParams.width, layoutParams.height);
-				cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+				if( isAutoFocusSupported() ) cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
 				if( hasFlash() ) cameraParams.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
 				
 				Camera.Size pictureSize=getLowResolutionPictureSize(cameraParams);
@@ -359,7 +359,7 @@ public class CameraViewProxy extends TiViewProxy
 		return result;
 	}
 	
-	/*
+	/**
 	 * Function to determine if flash support is available
 	 * @return Boolean Flash Support
 	 */
@@ -395,5 +395,16 @@ public class CameraViewProxy extends TiViewProxy
 		    }
 		}
 		return false;
+	}
+	
+	/**
+	 * Function to determine if Auto Focus is supported
+	 * @return Boolean Auto Focus Supported
+	 */
+	
+	private boolean isAutoFocusSupported() {
+		Camera cam = ((CameraView) view).currentCameraInstance();
+		List<String> supportedFocusModes = cam.getParameters().getSupportedFocusModes();
+		return supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
 	}
 }
