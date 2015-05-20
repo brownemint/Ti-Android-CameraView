@@ -1,5 +1,7 @@
 # Android Camera Module
 
+Latest Version: 0.6.1 (Dated: 20-05-2015)
+
 ## Description
 
 Titanium View with the background image sourced directly from the Android camera.
@@ -22,7 +24,9 @@ Create a new instance of the camera view. The method takes a dictionary of the f
 
 **arguments** 
  
-+ save_location - DIrectory to save the image to
++ save_location - Directory to save the image to
++ useFrontCamera - Boolean to indicate whether to use the front camera, or the back camera (default)
++ pictureTimeout - Integer to indicate how long to wait (milliseconds) before restarting the preview after a picture has been taken. A negative number will result in the preview not restarting.
 
 ### takePicture _(method)_
 
@@ -55,7 +59,11 @@ Then, to use the module in app, do something like the following:
 	
 	if( Ti.Media.isCameraSupported ) {
 		var androidcamera = require("pw.custom.androidcamera");
-		var camera = androidcamera.createCameraView({save_location: "pharmacy"});
+		var camera = androidcamera.createCameraView({
+            save_location: "pharmacy"
+            useFrontCamera: false,
+            pictureTimeout: 1000
+        });
 		
 		var btSnap = Ti.UI.createButton({
 			title: "Capture",

@@ -8,7 +8,11 @@ win.open();
 
 if( Ti.Media.isCameraSupported ) {
 	var androidcamera = require("pw.custom.androidcamera");
-	var camera = androidcamera.createCameraView({save_location: "pharmacy"});
+	var camera = androidcamera.createCameraView({
+		save_location: "pharmacy",
+		useFrontCamera: false,
+		pictureTimeout: 1000
+	});
 	
 	var btSnap = Ti.UI.createButton({
 		title: "Capture",

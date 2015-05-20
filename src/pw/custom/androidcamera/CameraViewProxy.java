@@ -20,9 +20,9 @@ import java.util.List;
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.titanium.proxy.TiViewProxy;
-import org.appcelerator.titanium.util.Log;
 import org.appcelerator.titanium.view.TiUIView;
 
+import android.util.Log;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -55,6 +55,7 @@ public class CameraViewProxy extends TiViewProxy
 	private static final String TAG = "CameraViewProxy";
 	private static String SAVE = "camera";
 	private static Boolean FRONT_CAMERA = false;
+	private static int PICTURE_TIMEOUT = 1000;
 	
 	private class CameraView extends TiUIView implements SurfaceHolder.Callback
 	{
@@ -93,6 +94,10 @@ public class CameraViewProxy extends TiViewProxy
 				Log.i(TAG, "Front Camera Property exists!");
 				FRONT_CAMERA = d.getBoolean("useFrontCamera");
 			}
+			
+			if( d.containsKey("pictureTimeout")){
+				PICTURE_TIMEOUT = d.getInt("pictureTimeout");
+			}
 		}
 
 		@Override
@@ -117,8 +122,15 @@ public class CameraViewProxy extends TiViewProxy
 			
 				Parameters cameraParams = camera.getParameters();
 				// cameraParams.setPreviewSize(layoutParams.width, layoutParams.height);
-				if( isAutoFocusSupported() ) cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-				if( hasFlash() ) cameraParams.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+				if( isAutoFocusSupported() ) {
+					Log.i(TAG, "Auto Focus is Supported");
+					cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+				}
+				
+				if( hasFlash() ) {
+					Log.i(TAG, "Flash is supported");
+					cameraParams.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+				}
 				
 				Camera.Size pictureSize=getLowResolutionPictureSize(cameraParams);
 				cameraParams.setPictureSize(pictureSize.width, pictureSize.height);
@@ -143,10 +155,13 @@ public class CameraViewProxy extends TiViewProxy
 			Camera c = null;
 			try
 			{
-				if( FRONT_CAMERA && hasFrontCamera() )
+				if( FRONT_CAMERA && hasFrontCamera() ) {
+					Log.i(TAG, "Using Front Camera");
 					c = Camera.open( Camera.CameraInfo.CAMERA_FACING_FRONT );
-				else
+				} else {
+					Log.i(TAG, "Using Back Camera");
 					c = Camera.open();
+				}
 			}
 			catch( Exception e )
 			{
@@ -192,6 +207,7 @@ public class CameraViewProxy extends TiViewProxy
 	@Kroll.method
 	public void snapPicture()
 	{
+		Log.i(TAG, "Snap");
 		Camera cam = ((CameraView) view).currentCameraInstance();
 		cam.autoFocus(mAutoFocusCallback);
 		// cam.takePicture(null, null, mPicture);
@@ -281,6 +297,7 @@ public class CameraViewProxy extends TiViewProxy
 		@Override
 		public void onAutoFocus(boolean arg0, Camera camera) {
 			// TODO Auto-generated method stub
+			Log.i(TAG, "On Auto Focus");
 			camera.takePicture(null, null, mPicture);
 		}
 		
@@ -293,6 +310,7 @@ public class CameraViewProxy extends TiViewProxy
 		@Override
 		public void onPictureTaken(byte[] data, Camera c) {
 			// TODO Auto-generated method stub
+			Log.i(TAG, "On Picture Taken");
 			File pictureFile = getOutputMediaFile(); //1 corresponds to MEDIA_TYPE_IMAGE
 			
 			if( pictureFile == null ) return;
@@ -307,6 +325,18 @@ public class CameraViewProxy extends TiViewProxy
 				
 				// Trigger 
 				triggerEvent(pictureFile.getPath());
+				
+				// Restart Preview
+				if (PICTURE_TIMEOUT >= 0) {
+					final Camera cam = c;
+					new android.os.Handler().postDelayed(
+					    new Runnable() {
+					        public void run() {
+					            Log.i("tag", "This'll run 300 milliseconds later");
+					            cam.startPreview();
+					        }
+					    }, PICTURE_TIMEOUT);
+				}
 			} catch (FileNotFoundException e){
 				Log.i(TAG, "File Not Found: "+e);
 			} catch (IOException e){
