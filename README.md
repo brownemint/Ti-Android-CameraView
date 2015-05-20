@@ -24,6 +24,7 @@ Create a new instance of the camera view. The method takes a dictionary of the f
  
 + save_location (String) - Directory to save the image in. DEFAULT = "camera". CREATION ONLY.
 + useFrontCamera (Boolean) - Use the front camera or not. DEFAULT = false. CREATION ONLY.
++ pictureTimeout (Integer) - Integer to indicate how long to wait (milliseconds) before restarting the preview after a picture has been taken. A negative number will result in the preview not restarting. DEFAULT = 1000. CREATION ONLY.
 
 ### takePicture _(method)_
 
@@ -58,7 +59,8 @@ Then, to use the module in app, do something like the following:
 		var androidcamera = require("pw.custom.androidcamera");
 		var camera = androidcamera.createCameraView({
 			save_location: "pharmacy",
-			useFrontCamera: true
+			useFrontCamera: true,
+			pictureTimeout: 200
 		});
 		
 		var btSnap = Ti.UI.createButton({
@@ -88,6 +90,9 @@ Then, to use the module in app, do something like the following:
 	}
 
 ##Changelog
+
+Version 0.6.1:
+Added ability to restart preview after x number of milliseconds after a picture is taken.
 
 Version 0.5:
 Removed potential crash when the app is resumed while the camera view is open.
