@@ -6,7 +6,7 @@ version: 0.6.1
 apiversion: 2
 description: Custom Android Camera
 author: Michael Browne
-license: Specify your license
+license: The MIT License (MIT)
 copyright: Copyright (c) 2013 by ProductWorld
 
 
