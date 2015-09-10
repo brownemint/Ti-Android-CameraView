@@ -2,8 +2,9 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 0.6.1
+version: 0.6.2
 apiversion: 2
+architectures: armeabi armeabi-v7a x86
 description: Custom Android Camera
 author: Michael Browne
 license: The MIT License (MIT)
@@ -15,4 +16,4 @@ name: custom-android-camera
 moduleid: pw.custom.androidcamera
 guid: 8343590d-67e5-4371-9bf4-86702cc8dd26
 platform: android
-minsdk: 3.1.0.GA
+minsdk: 3.5.1.GA
