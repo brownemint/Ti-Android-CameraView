@@ -124,9 +124,14 @@ public class CameraViewProxy extends TiViewProxy
 				camera.setDisplayOrientation(90);
 			
 				Parameters cameraParams = camera.getParameters();
-				//Camera.Size optimalSize = getPreviewSize(cameraParams, previewHolder.getSurfaceFrame());
-				Camera.Size optimalSize = getLowResolutionPictureSize(cameraParams, previewHolder.getSurfaceFrame());
-				cameraParams.setPreviewSize(optimalSize.width, optimalSize.height);
+				
+				//Camera.Size optimalPictureSize = getPreviewSize(cameraParams, previewHolder.getSurfaceFrame());
+				Camera.Size optimalPictureSize = getLowResolutionPictureSize(cameraParams, previewHolder.getSurfaceFrame());
+				cameraParams.setPictureSize(optimalPictureSize.width, optimalPictureSize.height);
+				
+				Camera.Size optimalPreviewSize = getLowResolutionPreviewSize(cameraParams, optimalPictureSize);
+				cameraParams.setPreviewSize(optimalPreviewSize.width, optimalPreviewSize.height);
+				
 				if( isAutoFocusSupported() ) {
 					Log.i(TAG, "Auto Focus is Supported");
 					cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
@@ -136,9 +141,6 @@ public class CameraViewProxy extends TiViewProxy
 					Log.i(TAG, "Flash is supported");
 					cameraParams.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
 				}
-				
-				//Camera.Size pictureSize=getLowResolutionPictureSize(cameraParams);
-				cameraParams.setPictureSize(optimalSize.width, optimalSize.height);
 				
 				camera.setParameters(cameraParams);
 			}
@@ -379,79 +381,28 @@ public class CameraViewProxy extends TiViewProxy
 	 * @return Camera.Size Best size match
 	 */
 	private Camera.Size getLowResolutionPictureSize(Camera.Parameters parameters, Rect holderSize){
-		int previewWidth = holderSize.width();
-		int previewHeight = holderSize.height();
+		int w = holderSize.width();
+		int h = holderSize.height();
 		
-		int idealArea = previewWidth * previewHeight;
-		int diff = Integer.MAX_VALUE;
-		Camera.Size result = null;
+		int idealArea = w * h;
+		int AreaDiff = Integer.MAX_VALUE;
 		
-		for( Camera.Size size : getSupportedPictureSizes(parameters) ){
-			int area = size.width * size.height;
-			if( Math.abs(idealArea - area) < diff ){
-				diff = Math.abs(idealArea - area);
-				result = size;
-			}
-		}
-		
-		return result;
-	}
-	
-	/*
-	 * Function to get a High Resolution Picture Size
-	 * @param Camera.Parameters Parameters for the camera
-	 * @return Camera.Size Best size match
-	 */
-	private Camera.Size getPreviewSize(Camera.Parameters parameters, Rect holderSize){
-		int previewWidth = holderSize.width();
-		int previewHeight = holderSize.height();
-
-		// Set the preview size to the most optimal given the target size
-		Camera.Size optimalPreviewSize = getOptimalPreviewSize(getSupportedPictureSizes(parameters), previewWidth, previewHeight);
-		if (optimalPreviewSize != null) {
-			if (previewWidth > previewHeight) {
-				aspectRatio = (double) optimalPreviewSize.width / optimalPreviewSize.height;
-			} else {
-				aspectRatio = (double) optimalPreviewSize.height / optimalPreviewSize.width;
-			}
-		}
-		if (previewHeight < previewWidth / aspectRatio) {
-			previewHeight = (int) (previewWidth / aspectRatio + .5);
-
-		} else {
-			previewWidth = (int) (previewHeight * aspectRatio + .5);
-		}
-		
-		return optimalPreviewSize;
-	}
-	
-	/**
-	 * Computes the optimal preview size given the target display size and aspect ratio.
-	 * 
-	 * @param supportPreviewSizes
-	 *            a list of preview sizes the camera supports
-	 * @param targetSize
-	 *            the target display size that will render the preview
-	 * @return the optimal size of the preview
-	 */
-	private static Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h)
-	{
 		double targetRatio = 1;
 		if (w > h) {
 			targetRatio = (double) w / h;
 		} else {
 			targetRatio = (double) h / w;
 		}
-		if (sizes == null) {
-			return null;
-		}
-		Camera.Size optimalSize = null;
 		double minAspectDiff = Double.MAX_VALUE;
-
-		// Try to find an size match aspect ratio and size
-		for (Camera.Size size : sizes) {
+		
+		Camera.Size optimalSize = null;
+		
+		for( Camera.Size size : getSupportedPictureSizes(parameters)){
+			int area = size.width * size.height;
 			double ratio = (double) size.width / size.height;
-			if (Math.abs(ratio - targetRatio) < minAspectDiff) {
+			
+			if( Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < minAspectDiff){
+				AreaDiff = Math.abs(idealArea - area);
 				minAspectDiff = Math.abs(ratio - targetRatio);
 				
 				optimalSize = size;
@@ -461,8 +412,47 @@ public class CameraViewProxy extends TiViewProxy
 		return optimalSize;
 	}
 	
+	/*
+	 * Function to get a same Resolution & ratio from Picture Size
+	 * Low Res defined as same screen size (are close to it)
+	 * @param Camera.Parameters Parameters for the camera
+	 * @return Camera.Size Best size match
+	 */
+	private Camera.Size getLowResolutionPreviewSize(Camera.Parameters parameters, Camera.Size pictureSize){
+		int w = pictureSize.width;
+		int h = pictureSize.height;
+		
+		int idealArea = w * h;
+		int AreaDiff = Integer.MAX_VALUE;
+		
+		double targetRatio = 1;
+		if (w > h) {
+			targetRatio = (double) w / h;
+		} else {
+			targetRatio = (double) h / w;
+		}
+		double minAspectDiff = Double.MAX_VALUE;
+		
+		Camera.Size optimalSize = null;
+		
+		for( Camera.Size size : parameters.getSupportedPreviewSizes()){
+			int area = size.width * size.height;
+			double ratio = (double) size.width / size.height;
+			
+			if( Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < minAspectDiff){
+				AreaDiff = Math.abs(idealArea - area);
+				minAspectDiff = Math.abs(ratio - targetRatio);
+				
+				optimalSize = size;
+			}
+		}
+		
+		return optimalSize;
+	}
+	
+		
 	/**
-	 * Android에서 지원되는 사진 Size 리스트를 반환한다.
+	 * take supported picture size & remove different ratio from preview size
 	 * 
 	 * @return
 	 */
