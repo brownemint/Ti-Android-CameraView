@@ -125,7 +125,7 @@ public class CameraViewProxy extends TiViewProxy
 			
 				Parameters cameraParams = camera.getParameters();
 				Camera.Size optimalSize=getPreviewSize(cameraParams, previewHolder.getSurfaceFrame());
-				cameraParams.setPreviewSize(optimalSize.width, optimalSize.height);
+				//cameraParams.setPreviewSize(optimalSize.width, optimalSize.height);
 				if( isAutoFocusSupported() ) {
 					Log.i(TAG, "Auto Focus is Supported");
 					cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
@@ -464,12 +464,12 @@ public class CameraViewProxy extends TiViewProxy
 	public List<Camera.Size> getSupportedPictureSizes(Camera.Parameters parameters) {
 	    List<Camera.Size> pictureSizes = parameters.getSupportedPictureSizes();
 	             
-	    checkSupportedPictureSizeAtPreviewSize(pictureSizes, parameters);
+	    pictureSizes = checkSupportedPictureSizeAtPreviewSize(pictureSizes, parameters);
 	     
 	    return pictureSizes;
 	}
 	 
-	private void checkSupportedPictureSizeAtPreviewSize(List<Camera.Size> pictureSizes, Camera.Parameters parameters) {
+	private List<Camera.Size> checkSupportedPictureSizeAtPreviewSize(List<Camera.Size> pictureSizes, Camera.Parameters parameters) {
 	    List<Camera.Size> previewSizes = parameters.getSupportedPreviewSizes();
 	    Camera.Size pictureSize;
 	    Camera.Size previewSize;
@@ -499,6 +499,8 @@ public class CameraViewProxy extends TiViewProxy
 	            //Logger.d(TAG, "remove picture size : " + pictureSize.width + ", " + pictureSize.height);
 	        }
 	    }
+	    
+	    return pictureSizes;
 	}
 	
 	/**
