@@ -28,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.AutoFocusCallback;
@@ -56,6 +57,8 @@ public class CameraViewProxy extends TiViewProxy
 	private static String SAVE = "camera";
 	private static Boolean FRONT_CAMERA = false;
 	private static int PICTURE_TIMEOUT = 1000;
+	
+	private double aspectRatio = 1;
 	
 	private class CameraView extends TiUIView implements SurfaceHolder.Callback
 	{
@@ -121,7 +124,8 @@ public class CameraViewProxy extends TiViewProxy
 				camera.setDisplayOrientation(90);
 			
 				Parameters cameraParams = camera.getParameters();
-				// cameraParams.setPreviewSize(layoutParams.width, layoutParams.height);
+				Camera.Size optimalSize=getPreviewSize(cameraParams, previewHolder.getSurfaceFrame());
+				cameraParams.setPreviewSize(optimalSize.width, optimalSize.height);
 				if( isAutoFocusSupported() ) {
 					Log.i(TAG, "Auto Focus is Supported");
 					cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
@@ -132,8 +136,8 @@ public class CameraViewProxy extends TiViewProxy
 					cameraParams.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
 				}
 				
-				Camera.Size pictureSize=getLowResolutionPictureSize(cameraParams);
-				cameraParams.setPictureSize(pictureSize.width, pictureSize.height);
+				//Camera.Size pictureSize=getLowResolutionPictureSize(cameraParams);
+				cameraParams.setPictureSize(optimalSize.width, optimalSize.height);
 				
 				camera.setParameters(cameraParams);
 			}
@@ -387,6 +391,114 @@ public class CameraViewProxy extends TiViewProxy
 		}
 		
 		return result;
+	}
+	
+	/*
+	 * Function to get a High Resolution Picture Size
+	 * @param Camera.Parameters Parameters for the camera
+	 * @return Camera.Size Best size match
+	 */
+	private Camera.Size getPreviewSize(Camera.Parameters parameters, Rect holderSize){
+		int previewWidth = holderSize.width();
+		int previewHeight = holderSize.height();
+
+		// Set the preview size to the most optimal given the target size
+		Camera.Size optimalPreviewSize = getOptimalPreviewSize(getSupportedPictureSizes(parameters), previewWidth, previewHeight);
+		if (optimalPreviewSize != null) {
+			if (previewWidth > previewHeight) {
+				aspectRatio = (double) optimalPreviewSize.width / optimalPreviewSize.height;
+			} else {
+				aspectRatio = (double) optimalPreviewSize.height / optimalPreviewSize.width;
+			}
+		}
+		if (previewHeight < previewWidth / aspectRatio) {
+			previewHeight = (int) (previewWidth / aspectRatio + .5);
+
+		} else {
+			previewWidth = (int) (previewHeight * aspectRatio + .5);
+		}
+		
+		return optimalPreviewSize;
+	}
+	
+	/**
+	 * Computes the optimal preview size given the target display size and aspect ratio.
+	 * 
+	 * @param supportPreviewSizes
+	 *            a list of preview sizes the camera supports
+	 * @param targetSize
+	 *            the target display size that will render the preview
+	 * @return the optimal size of the preview
+	 */
+	private static Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h)
+	{
+		double targetRatio = 1;
+		if (w > h) {
+			targetRatio = (double) w / h;
+		} else {
+			targetRatio = (double) h / w;
+		}
+		if (sizes == null) {
+			return null;
+		}
+		Camera.Size optimalSize = null;
+		double minAspectDiff = Double.MAX_VALUE;
+
+		// Try to find an size match aspect ratio and size
+		for (Camera.Size size : sizes) {
+			double ratio = (double) size.width / size.height;
+			if (Math.abs(ratio - targetRatio) < minAspectDiff) {
+				optimalSize = size;
+				minAspectDiff = Math.abs(ratio - targetRatio);
+			}
+		}
+		
+		return optimalSize;
+	}
+	
+	/**
+	 * Android에서 지원되는 사진 Size 리스트를 반환한다.
+	 * 
+	 * @return
+	 */
+	public List<Camera.Size> getSupportedPictureSizes(Camera.Parameters parameters) {
+	    List<Camera.Size> pictureSizes = parameters.getSupportedPictureSizes();
+	             
+	    checkSupportedPictureSizeAtPreviewSize(pictureSizes, parameters);
+	     
+	    return pictureSizes;
+	}
+	 
+	private void checkSupportedPictureSizeAtPreviewSize(List<Camera.Size> pictureSizes, Camera.Parameters parameters) {
+	    List<Camera.Size> previewSizes = parameters.getSupportedPreviewSizes();
+	    Camera.Size pictureSize;
+	    Camera.Size previewSize;
+	    double  pictureRatio = 0;
+	    double  previewRatio = 0;
+	    final double aspectTolerance = 0.05;
+	    boolean isUsablePicture = false;
+	     
+	    for (int indexOfPicture = pictureSizes.size() - 1; indexOfPicture >= 0; --indexOfPicture) {
+	        pictureSize = pictureSizes.get(indexOfPicture);
+	        pictureRatio = (double) pictureSize.width / (double) pictureSize.height;
+	        isUsablePicture = false;
+	         
+	        for (int indexOfPreview = previewSizes.size() - 1; indexOfPreview >= 0; --indexOfPreview) {
+	            previewSize = previewSizes.get(indexOfPreview);
+	             
+	            previewRatio = (double) previewSize.width / (double) previewSize.height;
+	             
+	            if (Math.abs(pictureRatio - previewRatio) < aspectTolerance) {
+	                isUsablePicture = true;
+	                break;
+	            }
+	        }
+	         
+	        if (isUsablePicture == false) {
+	            pictureSizes.remove(indexOfPicture);
+	            //Logger.d(TAG, "remove picture size : " + pictureSize.width + ", " + pictureSize.height);
+	        }
+	    }
 	}
 	
 	/**
