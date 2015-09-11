@@ -127,9 +127,11 @@ public class CameraViewProxy extends TiViewProxy
 				
 				//Camera.Size optimalPictureSize = getPreviewSize(cameraParams, previewHolder.getSurfaceFrame());
 				Camera.Size optimalPictureSize = getLowResolutionPictureSize(cameraParams, previewHolder.getSurfaceFrame());
+				Log.i(TAG, "optimalPictureSize width:"+optimalPictureSize.width+" height:"+optimalPictureSize.height);
 				cameraParams.setPictureSize(optimalPictureSize.width, optimalPictureSize.height);
 				
 				Camera.Size optimalPreviewSize = getLowResolutionPreviewSize(cameraParams, optimalPictureSize);
+				Log.i(TAG, "optimalPreviewSize width:"+optimalPreviewSize.width+" height:"+optimalPreviewSize.height);
 				cameraParams.setPreviewSize(optimalPreviewSize.width, optimalPreviewSize.height);
 				
 				if( isAutoFocusSupported() ) {
@@ -401,7 +403,7 @@ public class CameraViewProxy extends TiViewProxy
 			int area = size.width * size.height;
 			double ratio = (double) size.width / size.height;
 			
-			if( Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < minAspectDiff){
+			if( Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < (minAspectDiff * 1.05)){
 				AreaDiff = Math.abs(idealArea - area);
 				minAspectDiff = Math.abs(ratio - targetRatio);
 				
@@ -439,7 +441,7 @@ public class CameraViewProxy extends TiViewProxy
 			int area = size.width * size.height;
 			double ratio = (double) size.width / size.height;
 			
-			if( Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < minAspectDiff){
+			if( Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < (minAspectDiff * 1.05)){
 				AreaDiff = Math.abs(idealArea - area);
 				minAspectDiff = Math.abs(ratio - targetRatio);
 				
