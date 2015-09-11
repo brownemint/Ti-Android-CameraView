@@ -395,17 +395,19 @@ public class CameraViewProxy extends TiViewProxy
 		} else {
 			targetRatio = (double) h / w;
 		}
-		double minAspectDiff = Double.MAX_VALUE;
+		double minAspectDiff = 0.1;
 		
 		Camera.Size optimalSize = null;
 		
 		for( Camera.Size size : getSupportedPictureSizes(parameters)){
 			int area = size.width * size.height;
 			double ratio = (double) size.width / size.height;
+			if (ratio < 1) {
+				ratio = (double) size.height / size.width;
+			}
 			
-			if( Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < (minAspectDiff * 1.05)){
+			if( Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < minAspectDiff){
 				AreaDiff = Math.abs(idealArea - area);
-				minAspectDiff = Math.abs(ratio - targetRatio);
 				
 				optimalSize = size;
 			}
@@ -433,17 +435,19 @@ public class CameraViewProxy extends TiViewProxy
 		} else {
 			targetRatio = (double) h / w;
 		}
-		double minAspectDiff = Double.MAX_VALUE;
+		double minAspectDiff = 0.1;
 		
 		Camera.Size optimalSize = null;
 		
 		for( Camera.Size size : parameters.getSupportedPreviewSizes()){
 			int area = size.width * size.height;
 			double ratio = (double) size.width / size.height;
+			if (ratio < 1) {
+				ratio = (double) size.height / size.width;
+			}
 			
-			if( Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < (minAspectDiff * 1.05)){
+			if( Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < minAspectDiff){
 				AreaDiff = Math.abs(idealArea - area);
-				minAspectDiff = Math.abs(ratio - targetRatio);
 				
 				optimalSize = size;
 			}
