@@ -119,6 +119,11 @@ public class CameraViewProxy extends TiViewProxy
 			{
 				this.camera = getCameraInstance();
 				
+				if( this.camera == null ){
+					Log.e(TAG, "Camera is null. Make sure \n\t<uses-permission android:name=\"android.permission.CAMERA\" />\nis in you tiapp.xml file.");
+					throw new Exception();
+				}
+				
 				Log.i(TAG, "Setting Preview Display");
 				camera.setPreviewDisplay(previewHolder);
 				camera.setDisplayOrientation(90);
@@ -148,6 +153,9 @@ public class CameraViewProxy extends TiViewProxy
 			}
 			catch(IOException e)
 			{
+				e.printStackTrace();
+			} 
+			catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -218,8 +226,12 @@ public class CameraViewProxy extends TiViewProxy
 	{
 		Log.i(TAG, "Snap");
 		Camera cam = ((CameraView) view).currentCameraInstance();
-		cam.autoFocus(mAutoFocusCallback);
-		// cam.takePicture(null, null, mPicture);
+		
+		if( isAutoFocusSupported() ) {
+			cam.autoFocus(mAutoFocusCallback);
+		} else {
+			cam.takePicture(null, null, mPicture);
+		}
 	}
 	
 	// Added by michael browne
