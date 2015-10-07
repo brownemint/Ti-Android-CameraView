@@ -28,7 +28,25 @@ public class CustomAndroidCameraModule extends KrollModule
 	{
 		super();
 	}
-
+	
+	@Kroll.constant
+	public static final int RESOLUTION_HIGH = 0;
+	
+	@Kroll.constant
+	public static final int RESOLUTION_LOW = 1;
+	
+	@Kroll.constant
+	public static final int RESOLUTION_SCREEN = 2;
+	
+	@Kroll.constant
+	public static final int RESOLUTION_480 = 3;
+	
+	@Kroll.constant
+	public static final int RESOLUTION_720 = 4;
+	
+	@Kroll.constant
+	public static final int RESOLUTION_1080 = 5;
+	
 	@Kroll.onAppCreate
 	public static void onAppCreate(TiApplication app)
 	{

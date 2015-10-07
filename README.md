@@ -24,7 +24,8 @@ Create a new instance of the camera view. The method takes a dictionary of the f
  
 + save_location (String) - Directory to save the image in. DEFAULT = "camera". CREATION ONLY.
 + useFrontCamera (Boolean) - Use the front camera or not. DEFAULT = false. CREATION ONLY.
-+ pictureTimeout (Integer) - Integer to indicate how long to wait (milliseconds) before restarting the preview after a picture has been taken. A negative number will result in the preview not restarting. DEFAULT = 1000. CREATION ONLY.
++ pictureTimeout (Integer) - Integer to indicate how long to wait (milliseconds) before restarting the preview after a picture has been taken. A negative number (or 0) will result in the preview not restarting. DEFAULT = 1000. CREATION ONLY.
++ resolutionNamed (Integer) - Resolution for the camera and preview. Use one of these [constants](#res_constants). Default is _RESOLUTION_LOW_. CREATION ONLY.
 
 ### takePicture _(method)_
 
@@ -35,6 +36,15 @@ Capture the image currently on screen and save to the filesystem
 Returns a dictionary containing the following:
 
 + path - location of the image on the filesystem
+
+### <a name="res_constants"></a>Resolution Constants
+
++ RESOLUTION_HIGH - Use the highest resolution available on the device
++ RESOLUTION_LOW - Use the lowest resolution available on the device
++ RESOLUTION_SCREEN - Try to match the views resolution for the picture
++ RESOLUTION_480 - Set the resolution to 720*480 (or as close as possible)
++ RESOLUTION_720 - Set the resolution to 1280*720 (or as close as possible)
++ RESOLUTION_1080 - Set the resolution to 1920*1080 (or as close as possible)
 
 ## Usage
 
@@ -58,9 +68,10 @@ Then, to use the module in app, do something like the following:
 	if( Ti.Media.isCameraSupported ) {
 		var androidcamera = require("pw.custom.androidcamera");
 		var camera = androidcamera.createCameraView({
-			save_location: "pharmacy",
+			save_location: "my_app",
 			useFrontCamera: true,
-			pictureTimeout: 200
+			pictureTimeout: 200,
+			resolutionNamed: androidcamera.RESOLUTION_480
 		});
 		
 		var btSnap = Ti.UI.createButton({
@@ -91,6 +102,9 @@ Then, to use the module in app, do something like the following:
 
 ##Changelog
 
+Version 0.6.3:
+Added the ability to change the desired resolution for the camera (and match it with the preview) when the view is created.
+
 Version 0.6.1:
 Added ability to restart preview after x number of milliseconds after a picture is taken.
 
@@ -107,5 +121,4 @@ Michael Browne
 ## Notes
 
 + To switch between cameras, remove the current camera from the window, null it and recreate the camera view with the opposite useFrontCamera boolean and add it back to the window.
-+ Currently the image quality is set to its lowest value. An update to dynamically change this is imminent.
 + Don't forget to check out Jonathon Carter's [CameraView](https://github.com/jonathanrcarter/CameraView) for something similar for iOS

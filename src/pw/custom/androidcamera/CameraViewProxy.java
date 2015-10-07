@@ -57,11 +57,12 @@ public class CameraViewProxy extends TiViewProxy
 	private static String SAVE = "camera";
 	private static Boolean FRONT_CAMERA = false;
 	private static int PICTURE_TIMEOUT = 1000;
+	private static int RESOLUTION_NAME = CustomAndroidCameraModule.RESOLUTION_LOW;
 	
 	private double aspectRatio = 1;
 	
 	private class CameraView extends TiUIView implements SurfaceHolder.Callback
-	{
+	{	
 		private Camera camera;
 
 		public CameraView(TiViewProxy proxy) {
@@ -101,6 +102,10 @@ public class CameraViewProxy extends TiViewProxy
 			if( d.containsKey("pictureTimeout")){
 				PICTURE_TIMEOUT = d.getInt("pictureTimeout");
 			}
+			
+			if( d.containsKey("resolutionNamed") ){
+				RESOLUTION_NAME = d.getInt("resolutionNamed");
+			}
 		}
 
 		@Override
@@ -131,11 +136,40 @@ public class CameraViewProxy extends TiViewProxy
 				Parameters cameraParams = camera.getParameters();
 				
 				//Camera.Size optimalPictureSize = getPreviewSize(cameraParams, previewHolder.getSurfaceFrame());
-				Camera.Size optimalPictureSize = getLowResolutionPictureSize(cameraParams, previewHolder.getSurfaceFrame());
-				Log.i(TAG, "optimalPictureSize width:"+optimalPictureSize.width+" height:"+optimalPictureSize.height);
-				cameraParams.setPictureSize(optimalPictureSize.width, optimalPictureSize.height);
+				Camera.Size pictureSize = null; // getScreenResolutionPictureSize(cameraParams, previewHolder.getSurfaceFrame());
 				
-				Camera.Size optimalPreviewSize = getLowResolutionPreviewSize(cameraParams, optimalPictureSize);
+				switch(RESOLUTION_NAME){
+				case CustomAndroidCameraModule.RESOLUTION_HIGH:
+					Log.i(TAG, "Setting picture resolution to high");
+					pictureSize = getHighResolutionPictureSize(cameraParams);
+					break;
+				case CustomAndroidCameraModule.RESOLUTION_SCREEN:
+					Log.i(TAG, "Trying to match screen resolution for picture");
+					pictureSize = getScreenResolutionPictureSize(cameraParams, previewHolder.getSurfaceFrame());
+					break;
+				case CustomAndroidCameraModule.RESOLUTION_480:
+					Log.i(TAG, "Trying to match resolution of 720*480 for picture");
+					pictureSize = getCustomResolutionPictureSize(cameraParams, 720*480);
+					break;
+				case CustomAndroidCameraModule.RESOLUTION_720:
+					Log.i(TAG, "Trying to match resolution of 1280*720 for picture");
+					pictureSize = getCustomResolutionPictureSize(cameraParams, 1280*720);
+					break;
+				case CustomAndroidCameraModule.RESOLUTION_1080:
+					Log.i(TAG, "Trying to match resolution of 1920*1080 for picture");
+					pictureSize = getCustomResolutionPictureSize(cameraParams, 1920*1080);
+					break;
+				case CustomAndroidCameraModule.RESOLUTION_LOW:
+				default:
+					Log.i(TAG, "Setting picture resolution to low (default)");
+					pictureSize = getLowResolutionPictureSize(cameraParams);
+					break;
+				}
+				
+				Log.i(TAG, "pictureSize width:"+pictureSize.width+" height:"+pictureSize.height);
+				cameraParams.setPictureSize(pictureSize.width, pictureSize.height);
+				
+				Camera.Size optimalPreviewSize = getMatchingResolutionPreviewSize(cameraParams, pictureSize);
 				Log.i(TAG, "optimalPreviewSize width:"+optimalPreviewSize.width+" height:"+optimalPreviewSize.height);
 				cameraParams.setPreviewSize(optimalPreviewSize.width, optimalPreviewSize.height);
 				
@@ -387,14 +421,73 @@ public class CameraViewProxy extends TiViewProxy
 		return mediaFile;
 	}
 	
-	
 	/*
 	 * Function to get a Low Resolution Picture Size
-	 * Low Res defined as same screen size (are close to it)
 	 * @param Camera.Parameters Parameters for the camera
 	 * @return Camera.Size Best size match
 	 */
-	private Camera.Size getLowResolutionPictureSize(Camera.Parameters parameters, Rect holderSize){
+	private Camera.Size getLowResolutionPictureSize(Camera.Parameters parameters){
+		int area = Integer.MAX_VALUE;
+		Camera.Size result = null;
+		
+		for( Camera.Size size : parameters.getSupportedPictureSizes() ){
+			int calcArea = size.width * size.height;
+			if( calcArea < area ){
+				area = calcArea;
+				result = size;
+			}
+		}
+		
+		return result;
+	}
+	
+	/*
+	 * Function to get a High Resolution Picture Size
+	 * @param Camera.Parameters Parameters for the camera
+	 * @return Camera.Size Best size match
+	 */
+	private Camera.Size getHighResolutionPictureSize(Camera.Parameters parameters){		
+		int area = Integer.MIN_VALUE;
+		Camera.Size result = null;
+		
+		for( Camera.Size size : parameters.getSupportedPictureSizes() ){
+			int calcArea = size.width * size.height;
+			if( calcArea > area ){
+				area = calcArea;
+				result = size;
+			}
+		}
+		
+		return result;
+	}
+	
+	/*
+	 * Function to get a Custom Resolution Picture Size
+	 * @param Camera.Parameters Parameters for the camera
+	 * @param int ideal area for resolution
+	 * @return Camera.Size Best size match
+	 */
+	private Camera.Size getCustomResolutionPictureSize(Camera.Parameters parameters, int idealArea){
+		int diff = Integer.MAX_VALUE;
+		Camera.Size result = null;
+		
+		for( Camera.Size size : parameters.getSupportedPictureSizes() ){
+			int area = size.width * size.height;
+			if( Math.abs(idealArea - area) < diff ){
+				diff = Math.abs(idealArea - area);
+				result = size;
+			}
+		}
+		
+		return result;
+	}
+	
+	/*
+	 * Function to get a Screen Resolution Picture Size
+	 * @param Camera.Parameters Parameters for the camera
+	 * @return Camera.Size Best size match
+	 */
+	private Camera.Size getScreenResolutionPictureSize(Camera.Parameters parameters, Rect holderSize){
 		int w = holderSize.width();
 		int h = holderSize.height();
 		
@@ -430,11 +523,10 @@ public class CameraViewProxy extends TiViewProxy
 	
 	/*
 	 * Function to get a same Resolution & ratio from Picture Size
-	 * Low Res defined as same screen size (are close to it)
 	 * @param Camera.Parameters Parameters for the camera
 	 * @return Camera.Size Best size match
 	 */
-	private Camera.Size getLowResolutionPreviewSize(Camera.Parameters parameters, Camera.Size pictureSize){
+	private Camera.Size getMatchingResolutionPreviewSize(Camera.Parameters parameters, Camera.Size pictureSize){
 		int w = pictureSize.width;
 		int h = pictureSize.height;
 		
