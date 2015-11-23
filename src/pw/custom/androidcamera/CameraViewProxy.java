@@ -388,7 +388,9 @@ public class CameraViewProxy extends TiViewProxy
 					    new Runnable() {
 					        public void run() {
 					            Log.i("tag", "This'll run 300 milliseconds later");
-					            cam.startPreview();
+					            if (((CameraView) view).currentCameraInstance() != null) {
+					            	cam.startPreview();
+					            }
 					        }
 					    }, PICTURE_TIMEOUT);
 				}
