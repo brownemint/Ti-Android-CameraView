@@ -4,6 +4,8 @@
 
 Titanium View with the background image sourced directly from the Android camera.
 
+This module is not actively maintained. If you like using it and want to contribute that would be great, and very much appreciated. If you are looking for more features, check out [flashcam](https://github.com/RicardoJCP/flashcam) from Ricardo Pereira. Ricardo has cloned version 0.6.4 and will be adding methods for flash, torch, and possibly much more.
+
 ## Accessing the custom-android-camera Module
 
 To access this module from JavaScript, you would do the following:
@@ -115,7 +117,7 @@ Added ability to pick camera when creating view (useFrontCamera).
 ## Author
 
 Michael Browne
-
+[Email](mailto:brownemt@gmail.com)
 [@brownemint](http://www.twitter.com/brownemint)
 
 ## Notes
