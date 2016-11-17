@@ -1,0 +1,3 @@
+"/Users/InGrowth/Documents/Projects/Ti-Android-CameraView/android/build/generated/java/pw/custom/androidcamera/CustomAndroidCameraBootstrap.java"
+"/Users/InGrowth/Documents/Projects/Ti-Android-CameraView/android/src/pw/custom/androidcamera/CameraViewProxy.java"
+"/Users/InGrowth/Documents/Projects/Ti-Android-CameraView/android/src/pw/custom/androidcamera/CustomAndroidCameraModule.java"
