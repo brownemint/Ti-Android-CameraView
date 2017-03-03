@@ -104,6 +104,9 @@ Then, to use the module in app, do something like the following:
 
 ##Changelog
 
+Version 0.6.6:
+Updated to support Ti SDK 6.0.1.GA at a minimum
+
 Version 0.6.3:
 Added the ability to change the desired resolution for the camera (and match it with the preview) when the view is created.
 
