@@ -58,7 +58,7 @@ The following permissions need to be added to the manifest tag in tiapp.xml
     <uses-feature android:name="android.hardware.camera.autofocus"/>
 
 Then, to use the module in app, do something like the following:
-	
+
 	var win = Ti.UI.createWindow({
 		navBarHidden: true,
 		fullscreen: true,
@@ -67,7 +67,7 @@ Then, to use the module in app, do something like the following:
 	win.orientationModes = [Ti.UI.PORTRAIT];
 	win.open();
 	
-	if( Ti.Media.isCameraSupported ) {
+	function showCamera() {
 		var androidcamera = require("pw.custom.androidcamera");
 		var camera = androidcamera.createCameraView({
 			save_location: "my_app",
@@ -98,6 +98,20 @@ Then, to use the module in app, do something like the following:
 	
 		win.add(camera);
 		win.add(btSnap);
+	}
+
+	if( Ti.Media.isCameraSupported ) {
+		if (Ti.Media.hasCameraPermissions()) {
+		    showCamera();
+		} else { 
+		    Ti.Media.requestCameraPermissions(function(e) {
+	            if (e.success === true) {
+	                showCamera();
+	            } else {
+	                alert("Access denied, error: " + e.error);
+	            }
+		    });
+		}
 	} else {
 		alert("No camera found!");
 	}
