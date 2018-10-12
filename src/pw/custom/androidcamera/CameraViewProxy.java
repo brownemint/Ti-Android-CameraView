@@ -34,7 +34,6 @@ import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
 import android.view.SurfaceHolder;
@@ -359,39 +358,20 @@ public class CameraViewProxy extends TiViewProxy
 	private void rotatePicture(String path)
 	{
 		// Try and get the images metadata
-		try {
-			ExifInterface ei = new ExifInterface(path);
 
-			// Get the orientation from the meta data
-			int picture_orientation =
-				ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-			int device_orientation = act.getWindowManager().getDefaultDisplay().getOrientation();
-			int rotation = act.getWindowManager().getDefaultDisplay().getRotation();
+		int device_orientation = act.getWindowManager().getDefaultDisplay().getOrientation();
+		Log.d(TAG, "Device Orientation is " + device_orientation);
 
-			// Both give the same reading so wondering if the camera is rotated at all??
-			Log.d(TAG, "Picture Orientation is " + picture_orientation);
-			Log.d(TAG, "Device Orientation is " + device_orientation);
-
-			if (picture_orientation == 0) {
-				// no exif information - use device orientation
-				switch (device_orientation) {
-					case 0:
-						doRotation(path, 90);
-						break;
-					case 1:
-						doRotation(path, 0);
-						break;
-					case 3:
-						doRotation(path, 180);
-						break;
-				}
-			} else {
-				doRotation(path, FRONT_CAMERA ? 270 : 90); // Just rotate 90 degrees.... may cause problems on some
-			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		switch (device_orientation) {
+			case 0:
+				doRotation(path, 90);
+				break;
+			case 1:
+				doRotation(path, 0);
+				break;
+			case 3:
+				doRotation(path, 180);
+				break;
 		}
 	}
 
@@ -412,7 +392,7 @@ public class CameraViewProxy extends TiViewProxy
 		// Save the new bitmap to a byte array
 		File rotatedFile = new File(path);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		rotated.compress(CompressFormat.JPEG, 80, bos); // Best quality over 80
+		rotated.compress(CompressFormat.JPEG, 85, bos); // Best quality over 80
 		byte[] bitmapData = bos.toByteArray();
 
 		// Try to write (overwrite) the file
