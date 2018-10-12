@@ -43,9 +43,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.view.MotionEvent;
 
-
 // This proxy can be created by calling CustomAndroidCamera.createExample({message: "hello world"})
-@Kroll.proxy(creatableInModule=CustomAndroidCameraModule.class)
+@Kroll.proxy(creatableInModule = CustomAndroidCameraModule.class)
 public class CameraViewProxy extends TiViewProxy
 {
 	// Constructor
@@ -68,7 +67,8 @@ public class CameraViewProxy extends TiViewProxy
 	{
 		private Camera camera;
 
-		public CameraView(TiViewProxy proxy) {
+		public CameraView(TiViewProxy proxy)
+		{
 			super(proxy);
 
 			SurfaceView preview = new SurfaceView(proxy.getActivity());
@@ -83,7 +83,8 @@ public class CameraViewProxy extends TiViewProxy
 
 			preview.setOnTouchListener(new View.OnTouchListener() {
 				@Override
-				public boolean onTouch(View v, MotionEvent event) {
+				public boolean onTouch(View v, MotionEvent event)
+				{
 					if (event.getAction() == MotionEvent.ACTION_DOWN) {
 						focusOnTouch(event);
 					}
@@ -94,7 +95,8 @@ public class CameraViewProxy extends TiViewProxy
 
 		// added by michael browne
 		// Return the current camera instance
-		public Camera currentCameraInstance(){
+		public Camera currentCameraInstance()
+		{
 			return this.camera;
 		}
 
@@ -103,46 +105,48 @@ public class CameraViewProxy extends TiViewProxy
 		{
 			super.processProperties(d);
 
-			if(d.containsKey("save_location")){
+			if (d.containsKey("save_location")) {
 				SAVE = d.getString("save_location");
 			}
 
-			if( d.containsKey("useFrontCamera") ){
+			if (d.containsKey("useFrontCamera")) {
 				Log.d(TAG, "Front Camera Property exists!");
 				FRONT_CAMERA = d.getBoolean("useFrontCamera");
 			}
 
-			if( d.containsKey("pictureTimeout")){
+			if (d.containsKey("pictureTimeout")) {
 				PICTURE_TIMEOUT = d.getInt("pictureTimeout");
 			}
 
-			if( d.containsKey("resolutionNamed") ){
+			if (d.containsKey("resolutionNamed")) {
 				RESOLUTION_NAME = d.getInt("resolutionNamed");
 			}
 
-			if( d.containsKey("autoFlash") ){
+			if (d.containsKey("autoFlash")) {
 				AUTO_FLASH = d.getBoolean("autoFlash");
 			}
 		}
 
 		@Override
-		public void surfaceChanged(SurfaceHolder previewHolder, int format, int width,
-				int height) {
+		public void surfaceChanged(SurfaceHolder previewHolder, int format, int width, int height)
+		{
 			// TODO Auto-generated method stub
 			Log.d(TAG, "Starting Preview");
 			camera.startPreview();
 		}
 
 		@Override
-		public void surfaceCreated(SurfaceHolder previewHolder) {
+		public void surfaceCreated(SurfaceHolder previewHolder)
+		{
 			// TODO Auto-generated method stub
 			Log.d(TAG, "Opening Camera");
-			try
-			{
+			try {
 				this.camera = getCameraInstance();
 
-				if( this.camera == null ){
-					Log.e(TAG, "Camera is null. Make sure \n\t<uses-permission android:name=\"android.permission.CAMERA\" />\nis in you tiapp.xml file.");
+				if (this.camera == null) {
+					Log.e(
+						TAG,
+						"Camera is null. Make sure \n\t<uses-permission android:name=\"android.permission.CAMERA\" />\nis in you tiapp.xml file.");
 					throw new Exception();
 				}
 
@@ -153,9 +157,10 @@ public class CameraViewProxy extends TiViewProxy
 				Parameters cameraParams = camera.getParameters();
 
 				//Camera.Size optimalPictureSize = getPreviewSize(cameraParams, previewHolder.getSurfaceFrame());
-				Camera.Size pictureSize = null; // getScreenResolutionPictureSize(cameraParams, previewHolder.getSurfaceFrame());
+				Camera.Size pictureSize =
+					null; // getScreenResolutionPictureSize(cameraParams, previewHolder.getSurfaceFrame());
 
-				switch(RESOLUTION_NAME){
+				switch (RESOLUTION_NAME) {
 					case CustomAndroidCameraModule.RESOLUTION_HIGH:
 						Log.d(TAG, "Setting picture resolution to high");
 						pictureSize = getHighResolutionPictureSize(cameraParams);
@@ -166,15 +171,15 @@ public class CameraViewProxy extends TiViewProxy
 						break;
 					case CustomAndroidCameraModule.RESOLUTION_480:
 						Log.d(TAG, "Trying to match resolution of 720*480 for picture");
-						pictureSize = getCustomResolutionPictureSize(cameraParams, 720*480);
+						pictureSize = getCustomResolutionPictureSize(cameraParams, 720 * 480);
 						break;
 					case CustomAndroidCameraModule.RESOLUTION_720:
 						Log.d(TAG, "Trying to match resolution of 1280*720 for picture");
-						pictureSize = getCustomResolutionPictureSize(cameraParams, 1280*720);
+						pictureSize = getCustomResolutionPictureSize(cameraParams, 1280 * 720);
 						break;
 					case CustomAndroidCameraModule.RESOLUTION_1080:
 						Log.d(TAG, "Trying to match resolution of 1920*1080 for picture");
-						pictureSize = getCustomResolutionPictureSize(cameraParams, 1920*1080);
+						pictureSize = getCustomResolutionPictureSize(cameraParams, 1920 * 1080);
 						break;
 					case CustomAndroidCameraModule.RESOLUTION_LOW:
 						Log.d(TAG, "Setting picture resolution to low");
@@ -186,76 +191,73 @@ public class CameraViewProxy extends TiViewProxy
 						break;
 				}
 
-				Log.d(TAG, "pictureSize width:"+pictureSize.width+" height:"+pictureSize.height);
+				Log.d(TAG, "pictureSize width:" + pictureSize.width + " height:" + pictureSize.height);
 				cameraParams.setPictureSize(pictureSize.width, pictureSize.height);
 
 				Camera.Size optimalPreviewSize = getMatchingResolutionPreviewSize(cameraParams, pictureSize);
-				Log.d(TAG, "optimalPreviewSize width:"+optimalPreviewSize.width+" height:"+optimalPreviewSize.height);
+				Log.d(TAG,
+					  "optimalPreviewSize width:" + optimalPreviewSize.width + " height:" + optimalPreviewSize.height);
 				cameraParams.setPreviewSize(optimalPreviewSize.width, optimalPreviewSize.height);
 
-				if( isAutoFocusSupported() ) {
+				if (isAutoFocusSupported()) {
 					Log.d(TAG, "Auto Focus is Supported");
 					cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
 				}
 
-				if(AUTO_FLASH && hasFlash() ) {
+				if (AUTO_FLASH && hasFlash()) {
 					Log.d(TAG, "Flash is supported");
 					cameraParams.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
 				}
 
 				camera.setParameters(cameraParams);
-			}
-			catch(IOException e)
-			{
+			} catch (IOException e) {
 				e.printStackTrace();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 
-		private void focusOnTouch(MotionEvent event) {
-			if (camera != null ) {
+		private void focusOnTouch(MotionEvent event)
+		{
+			if (camera != null) {
 
-		        Camera.Parameters parameters = camera.getParameters();
-		        if (parameters.getMaxNumMeteringAreas() > 0){
-		            // Rect rect = calculateFocusArea(event.getX(), event.getY());
+				Camera.Parameters parameters = camera.getParameters();
+				if (parameters.getMaxNumMeteringAreas() > 0) {
+					// Rect rect = calculateFocusArea(event.getX(), event.getY());
 					//
-		            // parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-		            // List<Camera.Area> meteringAreas = new ArrayList<Camera.Area>();
-		            // meteringAreas.add(new Camera.Area(rect, 800));
-		            // parameters.setFocusAreas(meteringAreas);
+					// parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+					// List<Camera.Area> meteringAreas = new ArrayList<Camera.Area>();
+					// meteringAreas.add(new Camera.Area(rect, 800));
+					// parameters.setFocusAreas(meteringAreas);
 					//
-		            // camera.setParameters(parameters);
-		            camera.autoFocus(justAutoFocus);
-		        }else {
-		            camera.autoFocus(justAutoFocus);
-		        }
-		    }
+					// camera.setParameters(parameters);
+					camera.autoFocus(justAutoFocus);
+				} else {
+					camera.autoFocus(justAutoFocus);
+				}
+			}
 		}
 
 		@Override
-		public void surfaceDestroyed(SurfaceHolder arg0) {
+		public void surfaceDestroyed(SurfaceHolder arg0)
+		{
 			// TODO Auto-generated method stub
 			camera.release();
-			camera=null;
+			camera = null;
 		}
 
 		public Camera getCameraInstance()
 		{
 			Camera c = null;
-			try
-			{
-				if( FRONT_CAMERA && hasFrontCamera() ) {
+			try {
+				if (FRONT_CAMERA && hasFrontCamera()) {
 					Log.d(TAG, "Using Front Camera");
-					c = Camera.open( Camera.CameraInfo.CAMERA_FACING_FRONT );
+					c = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
 				} else {
 					Log.d(TAG, "Using Back Camera");
 					c = Camera.open();
 				}
-			}
-			catch( Exception e )
-			{
+			} catch (Exception e) {
 				Log.d(TAG, "Camera not available");
 			}
 			return c;
@@ -301,7 +303,7 @@ public class CameraViewProxy extends TiViewProxy
 		Log.d(TAG, "Snap");
 		Camera cam = ((CameraView) view).currentCameraInstance();
 
-		if( isAutoFocusSupported() ) {
+		if (isAutoFocusSupported()) {
 			cam.autoFocus(mAutoFocusCallback);
 		} else {
 			cam.takePicture(null, null, mPicture);
@@ -309,7 +311,7 @@ public class CameraViewProxy extends TiViewProxy
 	}
 
 	// Added by michael browne
-	private void triggerEvent( String path )
+	private void triggerEvent(String path)
 	{
 		KrollDict imagePath = new KrollDict();
 
@@ -317,24 +319,26 @@ public class CameraViewProxy extends TiViewProxy
 		Uri uriPath = Uri.fromFile(extFile);
 		imagePath.put("path", uriPath.toString());
 
-		Log.d(TAG, "Sending path back to Titanium. Image Path > "+uriPath.toString());
+		Log.d(TAG, "Sending path back to Titanium. Image Path > " + uriPath.toString());
 
 		fireEvent("picture_taken", imagePath);
 	}
 
 	//Added by michael browne
-	private void rotatePicture( String path ){
+	private void rotatePicture(String path)
+	{
 		// Try and get the images metadata
 		try {
 			ExifInterface ei = new ExifInterface(path);
 
 			// Get the orientation from the meta data
-			int picture_orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+			int picture_orientation =
+				ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 			int device_orientation = act.getWindowManager().getDefaultDisplay().getOrientation();
 
 			// Both give the same reading so wondering if the camera is rotated at all??
-			Log.d(TAG, "Picture Orientation is "+picture_orientation);
-			Log.d(TAG, "Device Orientation is "+device_orientation);
+			Log.d(TAG, "Picture Orientation is " + picture_orientation);
+			Log.d(TAG, "Device Orientation is " + device_orientation);
 
 			doRotation(path, FRONT_CAMERA ? 270 : 90); // Just rotate 90 degrees.... may cause problems on some devices
 
@@ -355,14 +359,15 @@ public class CameraViewProxy extends TiViewProxy
 	}
 
 	// Added by michael browne
-	private void doRotation( String path, float rotate ){
+	private void doRotation(String path, float rotate)
+	{
 		// Get a Bitmap representation of the image
 		BitmapFactory bFactory = new BitmapFactory();
 		Bitmap bmap = bFactory.decodeFile(path);
 
 		// Create the matrix for rotating the bitmap
 		Matrix matrix = new Matrix();
-		matrix.setRotate(rotate, bmap.getWidth()/2, bmap.getHeight()/2);
+		matrix.setRotate(rotate, bmap.getWidth() / 2, bmap.getHeight() / 2);
 
 		// Create a new version of the bitmap - but rotated
 		Bitmap rotated = Bitmap.createBitmap(bmap, 0, 0, bmap.getWidth(), bmap.getHeight(), matrix, true);
@@ -374,54 +379,49 @@ public class CameraViewProxy extends TiViewProxy
 		byte[] bitmapData = bos.toByteArray();
 
 		// Try to write (overwrite) the file
-		try{
+		try {
 			FileOutputStream fos = new FileOutputStream(rotatedFile);
 			fos.write(bitmapData);
 			fos.close();
-		} catch (FileNotFoundException e){
-			Log.d(TAG, "File Not Found: "+e);
-		} catch (IOException e){
-			Log.d(TAG, "IO Error: "+e);
+		} catch (FileNotFoundException e) {
+			Log.d(TAG, "File Not Found: " + e);
+		} catch (IOException e) {
+			Log.d(TAG, "IO Error: " + e);
 		}
-
 	}
 
-	private AutoFocusCallback mAutoFocusCallback = new AutoFocusCallback()
-	{
-
+	private AutoFocusCallback mAutoFocusCallback = new AutoFocusCallback() {
 		@Override
-		public void onAutoFocus(boolean arg0, Camera camera) {
+		public void onAutoFocus(boolean arg0, Camera camera)
+		{
 			// TODO Auto-generated method stub
 			Log.d(TAG, "On Auto Focus");
 			camera.takePicture(null, null, mPicture);
 		}
-
 	};
 
-	private AutoFocusCallback justAutoFocus = new AutoFocusCallback()
-	{
-
+	private AutoFocusCallback justAutoFocus = new AutoFocusCallback() {
 		@Override
-		public void onAutoFocus(boolean arg0, Camera camera) {
+		public void onAutoFocus(boolean arg0, Camera camera)
+		{
 			// TODO Auto-generated method stub
 			Log.d(TAG, "On Auto Focus");
 		}
-
 	};
 
 	// Added by michael browne
-	private PictureCallback mPicture = new PictureCallback()
-	{
-
+	private PictureCallback mPicture = new PictureCallback() {
 		@Override
-		public void onPictureTaken(byte[] data, Camera c) {
+		public void onPictureTaken(byte[] data, Camera c)
+		{
 			// TODO Auto-generated method stub
 			Log.d(TAG, "On Picture Taken");
 			File pictureFile = getOutputMediaFile(); //1 corresponds to MEDIA_TYPE_IMAGE
 
-			if( pictureFile == null ) return;
+			if (pictureFile == null)
+				return;
 
-			try{
+			try {
 				FileOutputStream fos = new FileOutputStream(pictureFile);
 				fos.write(data);
 				fos.close();
@@ -435,32 +435,33 @@ public class CameraViewProxy extends TiViewProxy
 				// Restart Preview
 				if (PICTURE_TIMEOUT >= 0) {
 					final Camera cam = c;
-					new android.os.Handler().postDelayed(
-					    new Runnable() {
-					        public void run() {
-					            Log.d("tag", "This'll run 300 milliseconds later");
-					            if (((CameraView) view).currentCameraInstance() != null) {
-					            	cam.startPreview();
-					            }
-					        }
-					    }, PICTURE_TIMEOUT);
+					new android.os.Handler().postDelayed(new Runnable() {
+						public void run()
+						{
+							Log.d("tag", "This'll run 300 milliseconds later");
+							if (((CameraView) view).currentCameraInstance() != null) {
+								cam.startPreview();
+							}
+						}
+					}, PICTURE_TIMEOUT);
 				}
-			} catch (FileNotFoundException e){
-				Log.d(TAG, "File Not Found: "+e);
-			} catch (IOException e){
-				Log.d(TAG, "IO Error: "+e);
+			} catch (FileNotFoundException e) {
+				Log.d(TAG, "File Not Found: " + e);
+			} catch (IOException e) {
+				Log.d(TAG, "IO Error: " + e);
 			}
 		}
-
 	};
 
 	// Added by michael browne
-	private static File getOutputMediaFile(){
+	private static File getOutputMediaFile()
+	{
 
-		File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),SAVE);
+		File mediaStorageDir =
+			new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), SAVE);
 
-		if( !mediaStorageDir.exists() ){
-			if( !mediaStorageDir.mkdirs()){
+		if (!mediaStorageDir.exists()) {
+			if (!mediaStorageDir.mkdirs()) {
 				Log.d("CAMERA FILE SYSTEM", "failed to create directory");
 				return null;
 			}
@@ -479,13 +480,14 @@ public class CameraViewProxy extends TiViewProxy
 	 * @param Camera.Parameters Parameters for the camera
 	 * @return Camera.Size Best size match
 	 */
-	private Camera.Size getLowResolutionPictureSize(Camera.Parameters parameters){
+	private Camera.Size getLowResolutionPictureSize(Camera.Parameters parameters)
+	{
 		int area = Integer.MAX_VALUE;
 		Camera.Size result = null;
 
-		for( Camera.Size size : parameters.getSupportedPictureSizes() ){
+		for (Camera.Size size : parameters.getSupportedPictureSizes()) {
 			int calcArea = size.width * size.height;
-			if( calcArea < area ){
+			if (calcArea < area) {
 				area = calcArea;
 				result = size;
 			}
@@ -499,13 +501,14 @@ public class CameraViewProxy extends TiViewProxy
 	 * @param Camera.Parameters Parameters for the camera
 	 * @return Camera.Size Best size match
 	 */
-	private Camera.Size getHighResolutionPictureSize(Camera.Parameters parameters){
+	private Camera.Size getHighResolutionPictureSize(Camera.Parameters parameters)
+	{
 		int area = Integer.MIN_VALUE;
 		Camera.Size result = null;
 
-		for( Camera.Size size : parameters.getSupportedPictureSizes() ){
+		for (Camera.Size size : parameters.getSupportedPictureSizes()) {
 			int calcArea = size.width * size.height;
-			if( calcArea > area ){
+			if (calcArea > area) {
 				area = calcArea;
 				result = size;
 			}
@@ -520,13 +523,14 @@ public class CameraViewProxy extends TiViewProxy
 	 * @param int ideal area for resolution
 	 * @return Camera.Size Best size match
 	 */
-	private Camera.Size getCustomResolutionPictureSize(Camera.Parameters parameters, int idealArea){
+	private Camera.Size getCustomResolutionPictureSize(Camera.Parameters parameters, int idealArea)
+	{
 		int diff = Integer.MAX_VALUE;
 		Camera.Size result = null;
 
-		for( Camera.Size size : parameters.getSupportedPictureSizes() ){
+		for (Camera.Size size : parameters.getSupportedPictureSizes()) {
 			int area = size.width * size.height;
-			if( Math.abs(idealArea - area) < diff ){
+			if (Math.abs(idealArea - area) < diff) {
 				diff = Math.abs(idealArea - area);
 				result = size;
 			}
@@ -540,7 +544,8 @@ public class CameraViewProxy extends TiViewProxy
 	 * @param Camera.Parameters Parameters for the camera
 	 * @return Camera.Size Best size match
 	 */
-	private Camera.Size getScreenResolutionPictureSize(Camera.Parameters parameters, Rect holderSize){
+	private Camera.Size getScreenResolutionPictureSize(Camera.Parameters parameters, Rect holderSize)
+	{
 		int w = holderSize.width();
 		int h = holderSize.height();
 
@@ -557,14 +562,14 @@ public class CameraViewProxy extends TiViewProxy
 
 		Camera.Size optimalSize = null;
 
-		for( Camera.Size size : getSupportedPictureSizes(parameters)){
+		for (Camera.Size size : getSupportedPictureSizes(parameters)) {
 			int area = size.width * size.height;
 			double ratio = (double) size.width / size.height;
 			if (ratio < 1) {
 				ratio = (double) size.height / size.width;
 			}
 
-			if( Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < minAspectDiff){
+			if (Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < minAspectDiff) {
 				AreaDiff = Math.abs(idealArea - area);
 
 				optimalSize = size;
@@ -579,7 +584,8 @@ public class CameraViewProxy extends TiViewProxy
 	 * @param Camera.Parameters Parameters for the camera
 	 * @return Camera.Size Best size match
 	 */
-	private Camera.Size getMatchingResolutionPreviewSize(Camera.Parameters parameters, Camera.Size pictureSize){
+	private Camera.Size getMatchingResolutionPreviewSize(Camera.Parameters parameters, Camera.Size pictureSize)
+	{
 		int w = pictureSize.width;
 		int h = pictureSize.height;
 
@@ -596,14 +602,14 @@ public class CameraViewProxy extends TiViewProxy
 
 		Camera.Size optimalSize = null;
 
-		for( Camera.Size size : parameters.getSupportedPreviewSizes()){
+		for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
 			int area = size.width * size.height;
 			double ratio = (double) size.width / size.height;
 			if (ratio < 1) {
 				ratio = (double) size.height / size.width;
 			}
 
-			if( Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < minAspectDiff){
+			if (Math.abs(idealArea - area) < AreaDiff && Math.abs(ratio - targetRatio) < minAspectDiff) {
 				AreaDiff = Math.abs(idealArea - area);
 
 				optimalSize = size;
@@ -613,73 +619,76 @@ public class CameraViewProxy extends TiViewProxy
 		return optimalSize;
 	}
 
-
 	/**
 	 * take supported picture size & remove different ratio from preview size
 	 *
 	 * @return
 	 */
-	public List<Camera.Size> getSupportedPictureSizes(Camera.Parameters parameters) {
-	    List<Camera.Size> pictureSizes = parameters.getSupportedPictureSizes();
+	public List<Camera.Size> getSupportedPictureSizes(Camera.Parameters parameters)
+	{
+		List<Camera.Size> pictureSizes = parameters.getSupportedPictureSizes();
 
-	    pictureSizes = checkSupportedPictureSizeAtPreviewSize(pictureSizes, parameters);
+		pictureSizes = checkSupportedPictureSizeAtPreviewSize(pictureSizes, parameters);
 
-	    return pictureSizes;
+		return pictureSizes;
 	}
 
-	private List<Camera.Size> checkSupportedPictureSizeAtPreviewSize(List<Camera.Size> pictureSizes, Camera.Parameters parameters) {
-	    List<Camera.Size> previewSizes = parameters.getSupportedPreviewSizes();
-	    Camera.Size pictureSize;
-	    Camera.Size previewSize;
-	    double  pictureRatio = 0;
-	    double  previewRatio = 0;
-	    final double aspectTolerance = 0.05;
-	    boolean isUsablePicture = false;
+	private List<Camera.Size> checkSupportedPictureSizeAtPreviewSize(List<Camera.Size> pictureSizes,
+																	 Camera.Parameters parameters)
+	{
+		List<Camera.Size> previewSizes = parameters.getSupportedPreviewSizes();
+		Camera.Size pictureSize;
+		Camera.Size previewSize;
+		double pictureRatio = 0;
+		double previewRatio = 0;
+		final double aspectTolerance = 0.05;
+		boolean isUsablePicture = false;
 
-	    for (int indexOfPicture = pictureSizes.size() - 1; indexOfPicture >= 0; --indexOfPicture) {
-	        pictureSize = pictureSizes.get(indexOfPicture);
-	        pictureRatio = (double) pictureSize.width / (double) pictureSize.height;
-	        isUsablePicture = false;
+		for (int indexOfPicture = pictureSizes.size() - 1; indexOfPicture >= 0; --indexOfPicture) {
+			pictureSize = pictureSizes.get(indexOfPicture);
+			pictureRatio = (double) pictureSize.width / (double) pictureSize.height;
+			isUsablePicture = false;
 
-	        for (int indexOfPreview = previewSizes.size() - 1; indexOfPreview >= 0; --indexOfPreview) {
-	            previewSize = previewSizes.get(indexOfPreview);
+			for (int indexOfPreview = previewSizes.size() - 1; indexOfPreview >= 0; --indexOfPreview) {
+				previewSize = previewSizes.get(indexOfPreview);
 
-	            previewRatio = (double) previewSize.width / (double) previewSize.height;
+				previewRatio = (double) previewSize.width / (double) previewSize.height;
 
-	            if (Math.abs(pictureRatio - previewRatio) < aspectTolerance) {
-	                isUsablePicture = true;
-	                break;
-	            }
-	        }
+				if (Math.abs(pictureRatio - previewRatio) < aspectTolerance) {
+					isUsablePicture = true;
+					break;
+				}
+			}
 
-	        if (isUsablePicture == false) {
-	            pictureSizes.remove(indexOfPicture);
-	            //Logger.d(TAG, "remove picture size : " + pictureSize.width + ", " + pictureSize.height);
-	        }
-	    }
+			if (isUsablePicture == false) {
+				pictureSizes.remove(indexOfPicture);
+				//Logger.d(TAG, "remove picture size : " + pictureSize.width + ", " + pictureSize.height);
+			}
+		}
 
-	    return pictureSizes;
+		return pictureSizes;
 	}
 
 	/**
 	 * Function to determine if flash support is available
 	 * @return Boolean Flash Support
 	 */
-	private boolean hasFlash(){
+	private boolean hasFlash()
+	{
 		Camera cam = ((CameraView) view).currentCameraInstance();
 		Parameters params = cam.getParameters();
-	    List<String> flashModes = params.getSupportedFlashModes();
-	    if(flashModes == null) {
-	        return false;
-	    }
+		List<String> flashModes = params.getSupportedFlashModes();
+		if (flashModes == null) {
+			return false;
+		}
 
-	    for(String flashMode : flashModes) {
-	        if(Parameters.FLASH_MODE_ON.equals(flashMode)) {
-	            return true;
-	        }
-	    }
+		for (String flashMode : flashModes) {
+			if (Parameters.FLASH_MODE_ON.equals(flashMode)) {
+				return true;
+			}
+		}
 
-	    return false;
+		return false;
 	}
 
 	/**
@@ -687,14 +696,15 @@ public class CameraViewProxy extends TiViewProxy
 	 * @return Boolean Front Camera Exists
 	 */
 
-	private boolean hasFrontCamera(){
-		int numCameras= Camera.getNumberOfCameras();
-		for(int i=0;i<numCameras;i++){
-		    Camera.CameraInfo info = new CameraInfo();
-		    Camera.getCameraInfo(i, info);
-		    if(Camera.CameraInfo.CAMERA_FACING_FRONT == info.facing){
-		        return true;
-		    }
+	private boolean hasFrontCamera()
+	{
+		int numCameras = Camera.getNumberOfCameras();
+		for (int i = 0; i < numCameras; i++) {
+			Camera.CameraInfo info = new CameraInfo();
+			Camera.getCameraInfo(i, info);
+			if (Camera.CameraInfo.CAMERA_FACING_FRONT == info.facing) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -704,7 +714,8 @@ public class CameraViewProxy extends TiViewProxy
 	 * @return Boolean Auto Focus Supported
 	 */
 
-	private boolean isAutoFocusSupported() {
+	private boolean isAutoFocusSupported()
+	{
 		Camera cam = ((CameraView) view).currentCameraInstance();
 		List<String> supportedFocusModes = cam.getParameters().getSupportedFocusModes();
 		return supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
