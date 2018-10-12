@@ -366,22 +366,28 @@ public class CameraViewProxy extends TiViewProxy
 			int picture_orientation =
 				ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 			int device_orientation = act.getWindowManager().getDefaultDisplay().getOrientation();
+			int rotation = act.getWindowManager().getDefaultDisplay().getRotation();
 
 			// Both give the same reading so wondering if the camera is rotated at all??
 			Log.d(TAG, "Picture Orientation is " + picture_orientation);
 			Log.d(TAG, "Device Orientation is " + device_orientation);
 
-			doRotation(path, FRONT_CAMERA ? 270 : 90); // Just rotate 90 degrees.... may cause problems on some devices
-
-			// Do the rotation depending on the orientation
-			/*switch(picture_orientation){
-				case ExifInterface.ORIENTATION_ROTATE_90:
-					doRotation(path, 90);
-					break;
-				case ExifInterface.ORIENTATION_ROTATE_180:
-					doRotation(path, 180);
-					break;
-			}*/
+			if (picture_orientation == 0) {
+				// no exif information - use device orientation
+				switch (device_orientation) {
+					case 0:
+						doRotation(path, 90);
+						break;
+					case 1:
+						doRotation(path, 0);
+						break;
+					case 3:
+						doRotation(path, 180);
+						break;
+				}
+			} else {
+				doRotation(path, FRONT_CAMERA ? 270 : 90); // Just rotate 90 degrees.... may cause problems on some
+			}
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
