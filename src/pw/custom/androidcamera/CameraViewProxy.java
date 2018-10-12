@@ -42,10 +42,11 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.view.MotionEvent;
+import android.view.Surface;
 
 // This proxy can be created by calling CustomAndroidCamera.createExample({message: "hello world"})
 @Kroll.proxy(creatableInModule = CustomAndroidCameraModule.class)
-public class CameraViewProxy extends TiViewProxy implements SurfaceHolder.Callback
+public class CameraViewProxy extends TiViewProxy
 {
 	// Constructor
 	public CameraViewProxy()
@@ -132,6 +133,7 @@ public class CameraViewProxy extends TiViewProxy implements SurfaceHolder.Callba
 		{
 			// TODO Auto-generated method stub
 			Log.d(TAG, "Starting Preview");
+			setCameraDisplayOrientation(act, 0, camera);
 			camera.startPreview();
 		}
 
@@ -150,15 +152,13 @@ public class CameraViewProxy extends TiViewProxy implements SurfaceHolder.Callba
 					throw new Exception();
 				}
 
+				setCameraDisplayOrientation(act, 0, camera);
+
 				Log.d(TAG, "Setting Preview Display");
 				camera.setPreviewDisplay(previewHolder);
-				camera.setDisplayOrientation(90);
-
 				Parameters cameraParams = camera.getParameters();
 
-				//Camera.Size optimalPictureSize = getPreviewSize(cameraParams, previewHolder.getSurfaceFrame());
-				Camera.Size pictureSize =
-					null; // getScreenResolutionPictureSize(cameraParams, previewHolder.getSurfaceFrame());
+				Camera.Size pictureSize = null;
 
 				switch (RESOLUTION_NAME) {
 					case CustomAndroidCameraModule.RESOLUTION_HIGH:
@@ -217,20 +217,43 @@ public class CameraViewProxy extends TiViewProxy implements SurfaceHolder.Callba
 			}
 		}
 
+		private void setCameraDisplayOrientation(Activity activity, int cameraId, android.hardware.Camera camera)
+		{
+			Camera.CameraInfo info = new Camera.CameraInfo();
+			Camera.getCameraInfo(cameraId, info);
+			int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+			int degrees = 0;
+			switch (rotation) {
+				case Surface.ROTATION_0:
+					degrees = 0;
+					break;
+				case Surface.ROTATION_90:
+					degrees = 90;
+					break;
+				case Surface.ROTATION_180:
+					degrees = 180;
+					break;
+				case Surface.ROTATION_270:
+					degrees = 270;
+					break;
+			}
+
+			int result;
+			if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+				result = (info.orientation + degrees) % 360;
+				result = (360 - result) % 360;
+			} else {
+				result = (info.orientation - degrees + 360) % 360;
+			}
+			camera.setDisplayOrientation(result);
+		}
+
 		private void focusOnTouch(MotionEvent event)
 		{
 			if (camera != null) {
 
 				Camera.Parameters parameters = camera.getParameters();
 				if (parameters.getMaxNumMeteringAreas() > 0) {
-					// Rect rect = calculateFocusArea(event.getX(), event.getY());
-					//
-					// parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-					// List<Camera.Area> meteringAreas = new ArrayList<Camera.Area>();
-					// meteringAreas.add(new Camera.Area(rect, 800));
-					// parameters.setFocusAreas(meteringAreas);
-					//
-					// camera.setParameters(parameters);
 					camera.autoFocus(justAutoFocus);
 				} else {
 					camera.autoFocus(justAutoFocus);
@@ -241,7 +264,6 @@ public class CameraViewProxy extends TiViewProxy implements SurfaceHolder.Callba
 		@Override
 		public void surfaceDestroyed(SurfaceHolder arg0)
 		{
-			// TODO Auto-generated method stub
 			camera.release();
 			camera = null;
 		}
