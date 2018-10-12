@@ -34,11 +34,19 @@ Create a new instance of the camera view. The method takes a dictionary of the f
 
 Capture the image currently on screen and save to the filesystem
 
+### doFocus _(method)_
+
+Focus view
+
 ### picture_taken _(event)_
 
 Returns a dictionary containing the following:
 
 + path - location of the image on the filesystem
+
+### onFocus _(event)_
+
+When done focusing
 
 ### <a name="res_constants"></a>Resolution Constants
 

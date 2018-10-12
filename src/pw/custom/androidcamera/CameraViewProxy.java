@@ -310,6 +310,15 @@ public class CameraViewProxy extends TiViewProxy
 		}
 	}
 
+	@Kroll.method
+	public void doFocus()
+	{
+		Camera cam = ((CameraView) view).currentCameraInstance();
+		if (isAutoFocusSupported()) {
+			cam.autoFocus(justAutoFocus);
+		}
+	}
+
 	// Added by michael browne
 	private void triggerEvent(String path)
 	{
@@ -406,6 +415,8 @@ public class CameraViewProxy extends TiViewProxy
 		{
 			// TODO Auto-generated method stub
 			Log.d(TAG, "On Auto Focus");
+			KrollDict kroll = new KrollDict();
+			fireEvent("onFocus", kroll);
 		}
 	};
 
