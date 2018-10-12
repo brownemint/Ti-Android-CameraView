@@ -14,7 +14,7 @@ import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.kroll.common.Log;
 
-@Kroll.module(name="CustomAndroidCamera", id="pw.custom.androidcamera")
+@Kroll.module(name = "CustomAndroidCamera", id = "pw.custom.androidcamera")
 public class CustomAndroidCameraModule extends KrollModule
 {
 
@@ -23,58 +23,34 @@ public class CustomAndroidCameraModule extends KrollModule
 
 	// You can define constants with @Kroll.constant, for example:
 	// @Kroll.constant public static final String EXTERNAL_NAME = value;
-	
+
 	public CustomAndroidCameraModule()
 	{
 		super();
 	}
-	
+
 	@Kroll.constant
 	public static final int RESOLUTION_HIGH = 0;
-	
+
 	@Kroll.constant
 	public static final int RESOLUTION_LOW = 1;
-	
+
 	@Kroll.constant
 	public static final int RESOLUTION_SCREEN = 2;
-	
+
 	@Kroll.constant
 	public static final int RESOLUTION_480 = 3;
-	
+
 	@Kroll.constant
 	public static final int RESOLUTION_720 = 4;
-	
+
 	@Kroll.constant
 	public static final int RESOLUTION_1080 = 5;
-	
+
 	@Kroll.onAppCreate
 	public static void onAppCreate(TiApplication app)
 	{
 		Log.d(TAG, "inside onAppCreate");
 		// put module init code that needs to run when the application is created
 	}
-
-	// Methods
-	@Kroll.method
-	public String example()
-	{
-		Log.d(TAG, "example called");
-		return "hello world";
-	}
-	
-	// Properties
-	@Kroll.getProperty
-	public String getExampleProp()
-	{
-		Log.d(TAG, "get example property");
-		return "hello world";
-	}
-	
-	
-	@Kroll.setProperty
-	public void setExampleProp(String value) {
-		Log.d(TAG, "set example property: " + value);
-	}
-
 }
-

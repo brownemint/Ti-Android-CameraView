@@ -1,36 +1,38 @@
+//
+// TODO Grant Android camera and storage permission for Android 6+ before opening the camera
+//
+
 var win = Ti.UI.createWindow({
 	navBarHidden: true,
 	fullscreen: true,
-	backgroundColor:'white'
+	backgroundColor: 'white'
 });
 win.orientationModes = [Ti.UI.PORTRAIT];
 win.open();
 
-if( Ti.Media.isCameraSupported ) {
+if (Ti.Media.isCameraSupported) {
 	var androidcamera = require("pw.custom.androidcamera");
 	var camera = androidcamera.createCameraView({
 		save_location: "pharmacy",
 		useFrontCamera: false,
 		pictureTimeout: 1000
 	});
-	
+
 	var btSnap = Ti.UI.createButton({
 		title: "Capture",
-		bottom: "10dp",
-		height: "80dp",
-		width: "80dp",
+		bottom: 10,
 		zIndex: 2
 	});
 
-	btSnap.addEventListener("click", function(){
+	btSnap.addEventListener("click", function() {
 		camera.snapPicture();
 	});
 
-	camera.addEventListener("picture_taken", function(evt){
-		alert("Image saved to "+evt.path);
+	camera.addEventListener("picture_taken", function(evt) {
+		alert("Image saved to " + evt.path);
 	});
 
-	win.addEventListener("close", function(){
+	win.addEventListener("close", function() {
 		camera = null;
 	});
 
