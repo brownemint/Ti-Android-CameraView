@@ -12,7 +12,7 @@ To access this module from JavaScript, you would do the following:
 
 	var androidcamera = require("pw.custom.androidcamera");
 
-The androidcamera variable is a reference to the Module object.	
+The androidcamera variable is a reference to the Module object.
 
 ## Reference
 
@@ -20,14 +20,15 @@ The cameraview takes the same properties and methods as the standard titanium vi
 
 ### createCameraView _(method)_
 
-Create a new instance of the camera view. The method takes a dictionary of the following arguments: 
+Create a new instance of the camera view. The method takes a dictionary of the following arguments:
 
-**arguments** 
- 
+**arguments**
+
 + save_location (String) - Directory to save the image in. DEFAULT = "camera". CREATION ONLY.
 + useFrontCamera (Boolean) - Use the front camera or not. DEFAULT = false. CREATION ONLY.
++ autoFlash (Boolean) - USe the flash light if needed. DEFAULT = false. CREATION ONLY.
 + pictureTimeout (Integer) - Integer to indicate how long to wait (milliseconds) before restarting the preview after a picture has been taken. A negative number (or 0) will result in the preview not restarting. DEFAULT = 1000. CREATION ONLY.
-+ resolutionNamed (Integer) - Resolution for the camera and preview. Use one of these [constants](#res_constants). Default is _RESOLUTION_LOW_. CREATION ONLY.
++ resolutionNamed (Integer) - Resolution for the camera and preview. Use one of these [constants](#res_constants). Default is _RESOLUTION_HIGH_. CREATION ONLY.
 
 ### takePicture _(method)_
 
@@ -57,66 +58,14 @@ The following permissions need to be added to the manifest tag in tiapp.xml
     <uses-feature android:name="android.hardware.camera"/>
     <uses-feature android:name="android.hardware.camera.autofocus"/>
 
-Then, to use the module in app, do something like the following:
+Then, to use the module in app, do something like the following: <a href="example/app.js">Example</a>
 
-	var win = Ti.UI.createWindow({
-		navBarHidden: true,
-		fullscreen: true,
-		backgroundColor:'white'
-	});
-	win.orientationModes = [Ti.UI.PORTRAIT];
-	win.open();
-	
-	function showCamera() {
-		var androidcamera = require("pw.custom.androidcamera");
-		var camera = androidcamera.createCameraView({
-			save_location: "my_app",
-			useFrontCamera: true,
-			pictureTimeout: 200,
-			resolutionNamed: androidcamera.RESOLUTION_480
-		});
-		
-		var btSnap = Ti.UI.createButton({
-			title: "Capture",
-			bottom: "10dp",
-			height: "80dp",
-			width: "80dp",
-			zIndex: 2
-		});
-	
-		btSnap.addEventListener("click", function(){
-			camera.snapPicture();
-		});
-	
-		camera.addEventListener("picture_taken", function(evt){
-			alert("Image saved to "+evt.path);
-		});
-	
-		win.addEventListener("close", function(){
-			camera = null;
-		});
-	
-		win.add(camera);
-		win.add(btSnap);
-	}
+## Changelog
 
-	if( Ti.Media.isCameraSupported ) {
-		if (Ti.Media.hasCameraPermissions()) {
-		    showCamera();
-		} else { 
-		    Ti.Media.requestCameraPermissions(function(e) {
-	            if (e.success === true) {
-	                showCamera();
-	            } else {
-	                alert("Access denied, error: " + e.error);
-	            }
-		    });
-		}
-	} else {
-		alert("No camera found!");
-	}
-
-##Changelog
+Version 1.0.0:
+Updated to support Ti SDK 7.0.0.GA at a minimum
+Added: Touch to Focus
+Added: autoFlash
 
 Version 0.6.6:
 Updated to support Ti SDK 6.0.1.GA at a minimum
