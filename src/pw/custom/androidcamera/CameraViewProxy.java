@@ -45,7 +45,7 @@ import android.view.MotionEvent;
 
 // This proxy can be created by calling CustomAndroidCamera.createExample({message: "hello world"})
 @Kroll.proxy(creatableInModule = CustomAndroidCameraModule.class)
-public class CameraViewProxy extends TiViewProxy
+public class CameraViewProxy extends TiViewProxy implements SurfaceHolder.Callback
 {
 	// Constructor
 	public CameraViewProxy()
