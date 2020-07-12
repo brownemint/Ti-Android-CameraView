@@ -368,7 +368,10 @@ public class CameraViewProxy extends TiViewProxy
 			Log.i(TAG, "On Picture Taken");
 			File pictureFile = getOutputMediaFile(); //1 corresponds to MEDIA_TYPE_IMAGE
 			
-			if( pictureFile == null ) return;
+			if( pictureFile == null ) {
+				Log.i(TAG, "pictureFile is null");
+				return;
+			}
 			
 			try{
 				FileOutputStream fos = new FileOutputStream(pictureFile);
