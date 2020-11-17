@@ -3,3 +3,4 @@ bin
 build
 .apt_generated
 dist
+.idea/

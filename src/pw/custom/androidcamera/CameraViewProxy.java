@@ -21,7 +21,7 @@ import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.titanium.proxy.TiViewProxy;
 import org.appcelerator.titanium.view.TiUIView;
-
+import org.appcelerator.titanium.TiApplication;
 import android.util.Log;
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -67,7 +67,7 @@ public class CameraViewProxy extends TiViewProxy
 
 		public CameraView(TiViewProxy proxy) {
 			super(proxy);
-			
+
 			SurfaceView preview = new SurfaceView(proxy.getActivity());
 			SurfaceHolder previewHolder = preview.getHolder();
 			previewHolder.addCallback(this);
@@ -277,7 +277,7 @@ public class CameraViewProxy extends TiViewProxy
 		Uri uriPath = Uri.fromFile(extFile);
 		imagePath.put("path", uriPath.toString());
 		
-		Log.i(TAG, "Sending path back to Titanium. Image Path > "+uriPath.toString());
+		Log.i(TAG, "Sending path back to Titanium. Image Path > " + uriPath.toString());
 		
 		fireEvent("picture_taken", imagePath);
 	}
@@ -293,7 +293,7 @@ public class CameraViewProxy extends TiViewProxy
 			int device_orientation = act.getWindowManager().getDefaultDisplay().getOrientation();
 			
 			// Both give the same reading so wondering if the camera is rotated at all??
-			Log.i(TAG, "Picture Orientation is "+picture_orientation);
+			Log.i(TAG, "Picture Orientation is " +picture_orientation);
 			Log.i(TAG, "Device Orientation is "+device_orientation);
 			
 			doRotation(path, FRONT_CAMERA ? 270 : 90); // Just rotate 90 degrees.... may cause problems on some devices
@@ -409,20 +409,20 @@ public class CameraViewProxy extends TiViewProxy
 	// Added by michael browne
 	private static File getOutputMediaFile(){
 		
-		File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),SAVE);
-		
+		File mediaStorageDir = TiApplication.getAppRootOrCurrentActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
 		if( !mediaStorageDir.exists() ){
 			if( !mediaStorageDir.mkdirs()){
 				Log.i("CAMERA FILE SYSTEM", "failed to create directory");
 				return null;
 			}
 		}
-		
 		// Create a media file
 		String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 		
 		File mediaFile;
 		mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timestamp + ".jpg");
+		Log.i(TAG, "New Picture path " + mediaFile.getPath());
 		return mediaFile;
 	}
 	
